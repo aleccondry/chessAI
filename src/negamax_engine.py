@@ -137,7 +137,7 @@ class NegamaxEngine:
                     alpha = score
         return alpha
 
-    def selectmove(self, board, depth=3):
+    def selectmove(self, board, depth=2):
         try:
             move = chess.polyglot.MemoryMappedReader("../books/human.bin").weighted_choice(board).move
             # move = chess.polyglot.MemoryMappedReader("./books/computer.bin").weighted_choice(board).move

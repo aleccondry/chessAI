@@ -20,7 +20,6 @@ def play_game(white, black):
         add_move_to_history(curr_move)
         board.push(curr_move)
         print(board, end='\n\n')
-    # game.add_line(movehistory)
     print(movehistory)
     game.headers["Event"] = "Self Tournament 2020"
     game.headers["Site"] = "Pune"
@@ -40,6 +39,14 @@ def add_move_to_history(move):
         movehistory[1].append("")
     else:
         movehistory[1][-1] = move
+
+
+def remove_move_from_history():
+    if board.turn == chess.WHITE:
+        movehistory[1][-1] = ""
+    else:
+        movehistory[0].pop()
+        movehistory[1].pop()
 
 
 def check_result():
@@ -144,6 +151,7 @@ def reset_game():
 @app.route("/undo/", methods=['POST'])
 def undo():
     try:
+        remove_move_from_history()
         board.pop()
     except Exception:
         traceback.print_exc()
@@ -157,6 +165,7 @@ if __name__ == '__main__':
     movehistory = [[], []]
     negamax_engine = NegamaxEngine()
     stockfish_engine = StockfishEngine()
+    ai_game_generator = None
 
     # start webserver
     webbrowser.open("http://127.0.0.1:5000/")
