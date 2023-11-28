@@ -1,0 +1,38 @@
+input {
+    font-size: 20px;
+}
+
+button {
+    font-size: 20px;
+}
+
+.container {
+  display: flex;
+  align-items: start; /* Align items at the top */
+}
+
+.table-container {
+  max-height: 510px; /* Set a maximum height for the container */
+  overflow-y: auto; /* Enable vertical scroll when content exceeds the container height */
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 0px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+img {
+  max-width: 100%;
+  margin-right: 20px;
+}

@@ -1,0 +1,62 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<h2>Chess Game Moves</h2>
+
+<div class="container">
+    <img width=510 height=510 src="/board.svg?%f" alt="Current Chessboard"/><br>
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Move Number</th>
+                <th>White Move</th>
+                <th>Black Move</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for move_number, (white_move, black_move) in enumerate(zip(white_moves, black_moves)) %}
+            <tr>
+                <td>{{ move_number }}</td>
+                <td>{{ white_move }}</td>
+                <td>{{ black_move }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div>Result: {{ result }}</div>
+<form action="/game/" method="post">
+    <button name="New Game" type="submit">New Game</button>
+</form>
+<form action="/undo/" method="post">
+    <button name="Undo" type="submit">Undo Last Move</button>
+</form>
+<form action="/move/">
+    <input type="submit" value="Make Human Move:"><input name="move" type="text"/>
+</form>
+<form action="/negamax_engine/" method="post">
+    <button name="Negamax Move" type="submit">Make Negamax Move</button>
+</form>
+<form action="/stockfish_engine/" method="post">
+    <button name="Stockfish Move" type="submit">Make Stockfish Move</button>
+</form>
+<form action="/ai_game/">
+    <input placeholder="white player" type="text" id="whiteplayer" name="whiteplayer" required>
+
+    <input placeholder="black player" type="text" id="blackplayer" name="blackplayer" required>
+    <button type="submit">Start AI Game</button>
+</form>
+
+</body>
+</html>
