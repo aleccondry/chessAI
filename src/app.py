@@ -5,35 +5,32 @@ import traceback
 import chess.pgn
 import chess.engine
 import datetime
-from flask import Flask, Response, request, render_template
+from flask import Flask, Response, request, render_template, redirect
 import webbrowser
 from negamax_engine import NegamaxEngine
 from stockfish_engine import StockfishEngine
+from pynput import keyboard
+from pynput.keyboard import Key
+import threading
+from neural_engine import get_nn_engine
 
 app = Flask(__name__, template_folder='../templates', static_folder="../static")
 
 
 def play_game(white, black):
-    game = chess.pgn.Game()
     while not board.is_game_over(claim_draw=True):
         curr_move = white.selectmove(board) if board.turn == chess.WHITE else black.selectmove(board)
         add_move_to_history(curr_move)
         board.push(curr_move)
         print(board, end='\n\n')
-    print(movehistory)
-    game.headers["Event"] = "Self Tournament 2020"
-    game.headers["Site"] = "Pune"
-    game.headers["Date"] = str(datetime.datetime.now().date())
-    game.headers["Round"] = 1
-    game.headers["White"] = "Ai"
-    game.headers["Black"] = "Ai"
-    game.headers["Result"] = str(board.result(claim_draw=True))
-    print(game)
     return chess.svg.board(board=board, size=400)
 
 
 def add_move_to_history(move):
-    move = board.san(chess.Move.from_uci(str(move)))
+    try:
+        move = board.san(chess.Move.from_uci(str(move)))
+    except chess.InvalidMoveError:
+        pass
     if board.turn == chess.WHITE:
         movehistory[0].append(move)
         movehistory[1].append("")
@@ -70,7 +67,8 @@ def main():
                            black_moves=movehistory[1],
                            zip=zip,
                            enumerate=enumerate,
-                           result=check_result())
+                           result=check_result(),
+                           player_turn=board.turn)
 
 
 # Display Board
@@ -83,9 +81,9 @@ def board():
 @app.route("/move/")
 def move():
     try:
-        move = request.args.get('move', default="")
-        add_move_to_history(move)
-        board.push_san(move)
+        h_move = request.args.get('move', default="")
+        add_move_to_history(h_move)
+        board.push_san(h_move)
     except Exception:
         traceback.print_exc()
     return main()
@@ -96,7 +94,11 @@ def get_engine(engine_name):
         case "negamax" | "n":
             return negamax_engine
         case "stockfish" | "s":
-            return stockfish_engine
+            return stockfish_engine9
+        case "stockfish16" | "s16":
+            return stockfish_engine16
+        case "neural" | "nn":
+            return neural_engine
         case "human":
             return None
         case _:
@@ -105,9 +107,12 @@ def get_engine(engine_name):
 
 @app.route("/ai_game/")
 def play_ai_game():
+    global white_engine, black_engine
     try:
-        white_engine = get_engine(request.args.get('whiteplayer', default=""))
-        black_engine = get_engine(request.args.get('blackplayer', default=""))
+        wp = request.args.get('whiteplayer', default="")
+        bp = request.args.get('blackplayer', default="")
+        white_engine = white_engine if get_engine(wp) is None else get_engine(wp)
+        black_engine = black_engine if get_engine(bp) is None else get_engine(bp)
         play_game(white_engine, black_engine)
     except Exception:
         traceback.print_exc()
@@ -118,9 +123,9 @@ def play_ai_game():
 @app.route("/stockfish_engine/", methods=['POST'])
 def stockfish_engine_endpoint():
     try:
-        move = stockfish_engine.selectmove(board)
-        add_move_to_history(move)
-        board.push(move)
+        s_move = stockfish_engine9.selectmove(board)
+        add_move_to_history(s_move)
+        board.push(s_move)
     except Exception:
         traceback.print_exc()
     return main()
@@ -130,9 +135,22 @@ def stockfish_engine_endpoint():
 @app.route("/negamax_engine/", methods=['POST'])
 def negamax_engine_endpoint():
     try:
-        move = negamax_engine.selectmove(board)
-        add_move_to_history(move)
-        board.push(move)
+        n_move = negamax_engine.selectmove(board)
+        add_move_to_history(n_move)
+        board.push(n_move)
+    except Exception:
+        traceback.print_exc()
+    return main()
+
+
+@app.route("/neural_engine/", methods=['POST'])
+def neural_engine_endpoint():
+    try:
+        print("Making neural move")
+        nn_move = neural_engine.selectmove(board)
+        print(f"neural move: {nn_move}")
+        add_move_to_history(nn_move)
+        board.push(nn_move)
     except Exception:
         traceback.print_exc()
     return main()
@@ -163,9 +181,14 @@ if __name__ == '__main__':
     # create board and engines
     board = chess.Board()
     movehistory = [[], []]
+
     negamax_engine = NegamaxEngine()
-    stockfish_engine = StockfishEngine()
-    ai_game_generator = None
+    stockfish_engine9 = StockfishEngine(9)
+    stockfish_engine16 = StockfishEngine(16)
+    neural_engine = get_nn_engine()
+
+    white_engine = None
+    black_engine = None
 
     # start webserver
     webbrowser.open("http://127.0.0.1:5000/")

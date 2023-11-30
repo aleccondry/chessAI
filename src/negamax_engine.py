@@ -140,8 +140,8 @@ class NegamaxEngine:
     def selectmove(self, board, depth=2):
         try:
             move = chess.polyglot.MemoryMappedReader("../books/human.bin").weighted_choice(board).move
-            # move = chess.polyglot.MemoryMappedReader("./books/computer.bin").weighted_choice(board).move
-            # move = chess.polyglot.MemoryMappedReader("./books/pecg_book.bin").weighted_choice(board).move
+            # move = chess.polyglot.MemoryMappedReader("../books/computer.bin").weighted_choice(board).move
+            # move = chess.polyglot.MemoryMappedReader("../books/pecg_book.bin").weighted_choice(board).move
             return move
         except IndexError:
             bestMove = chess.Move.null()

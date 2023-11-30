@@ -35,7 +35,9 @@
         </table>
     </div>
 </div>
-<div>Result: {{ result }}</div>
+<div class="information">Player turn: {{ "White" if player_turn == 1 else "Black" }}</div>
+<div class="information">Result: {{ result }}</div>
+
 <form action="/game/" method="post">
     <button name="New Game" type="submit">New Game</button>
 </form>
@@ -51,10 +53,13 @@
 <form action="/stockfish_engine/" method="post">
     <button name="Stockfish Move" type="submit">Make Stockfish Move</button>
 </form>
+<form action="/neural_engine/" method="post">
+    <button name="Neural Move" type="submit">Make Neural Move</button>
+</form>
 <form action="/ai_game/">
-    <input placeholder="white player" type="text" id="whiteplayer" name="whiteplayer" required>
-    <input placeholder="black player" type="text" id="blackplayer" name="blackplayer" required>
-    <button type="submit">Start AI Game</button>
+    <input placeholder="white player" type="text" id="whiteplayer" name="whiteplayer">
+    <input placeholder="black player" type="text" id="blackplayer" name="blackplayer">
+    <button id="game" type="submit">Start AI Game</button>
 </form>
 
 </body>
